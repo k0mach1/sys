@@ -8,7 +8,7 @@ SUBROUTINE summation_g(n, g, sum_g)
 
   INTEGER :: i
 
-  sum_f = 0.0D0
+  sum_g = 0.0D0
 
   DO i = 1, n
     sum_g = sum_g+ g(i)
