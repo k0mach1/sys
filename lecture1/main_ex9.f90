@@ -24,19 +24,19 @@ CLOSE(10)
 
 ax = x(2) - x(1)
 ay = y(2) - y(1)
-ax = z(2) - z(1)
+az = z(2) - z(1)
 
 bx = x(3) - x(1)
 by = y(3) - y(1)
-bx = z(3) - z(1)
+bz = z(3) - z(1)
 
 cx = x(4) - x(1)
 cy = y(4) - y(1)
-cx = z(4) - z(1)
+cz = z(4) - z(1)
 
 dx = ay * bz - az * by
 dy = az * bx - ax * bz
-dx = ax * by - ay * bx
+dz = ax * by - ay * bx
 
 volume = ( 1.0D0 / 6.0D0 ) * ( cx * dx + cy * dy + cz * dz )
 
