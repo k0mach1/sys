@@ -1,0 +1,7 @@
+PROGRAM main_prob1
+
+IMPLICIT NONE
+
+USE
+
+END PROGRAM main_prob1
