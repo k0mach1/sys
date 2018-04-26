@@ -67,15 +67,15 @@ SUBROUTINE start_appli()
 
   CALL get_elements3d_n(es3d, es3d_n)
 
+  CALL get_localelement3d_nqps(le3d, le3d_nqps)
+
 !--------------------------------------------------------------
 
   CALL init_nodes3d(ns3d, ns3d_n)
 
-  CALL init_localelement3d(le3d, le3d_nboundaries, le3d_nnodes)
+  CALL init_localelement3d(le3d, le3d_nboundaries, le3d_nnodes, le3d_nqps)
 
   CALL init_elements3d(es3d, ns3d, le3d, es3d_n)
-
-  CALL init_rectmesher3d(rm3d, ns3d, le3d, es3d, rm3d_n_x, rm3d_x_start, rm3d_x_end)
 
 !--------------------------------------------------------------------
 
@@ -114,6 +114,8 @@ SUBROUTINE run_appli()
 !--------------------------------------------------------------------
 
   CALL cal_rectmesher3d(rm3d)
+
+  CALL cal_elements3d(es3d)
 
 !--------------------------------------------------------------------
 
