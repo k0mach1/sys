@@ -255,9 +255,109 @@ SUBROUTINE cal_elements3d(es3d)
 
 TYPE(struct_elements3d), INTENT(INOUT) :: es3d
 
+
+  INTEGER :: ns3d_n
+  INTEGER :: le3d_nnodes
+  INTEGER :: le3d_nqps
+  INTEGER :: nqps_tot
+  INTEGER :: i
+  INTEGER :: id
+  INTEGER :: na
+  INTEGER :: ie
+  INTEGER :: ijk
+
+  REAL(8), ALLOCATABLE :: ns3d_x(:, :)
+  REAL(8), ALLOCATABLE :: le3d_xi_qp(:, :)
+  REAL(8), ALLOCATABLE :: le3d_w_qp(:, :)
+  REAL(8), ALLOCATABLE :: le3d_n_qp(:, :)
+  REAL(8), ALLOCATABLE :: le3d_dndxi_qp(:, :, :)
+  REAL(8), ALLOCATABLE :: x_local(:, :)
+  REAL(8) :: w_xi, w_eta, w_zeta
+  REAL(8) :: g1(3), g2(3), g3(3)
+  REAL(8) :: det_j
+  REAL(8) :: w_w_w_det_j
+
 !--------------------------------------------------------------------
 
-INTEGER :: ie
+  CALL get_nodes3d_n(es3d%ns3d, ns3d_n)
+  ALLOCATE( ns3d_x(3, ns3d_n) )
+  CALL get_nodes3d_x(es3d%ns3d, ns3d_x)
+
+  CALL get_localelement3d_nnodes(es3d%le3d, le3d_nnodes)
+  CALL get_localelement3d_nqps(es3d%le3d, le3d_nqps)
+  nqps_tot = le3d_nqps*le3d_nqps*le3d_nqps
+  ALLOCATE( le3d_xi_qp(3, nqps_tot) )
+  ALLOCATE( le3d_w_qp(3, nqps_tot) )
+  CALL get_localelement3d_xi_w_qp(es3d%le3d, le3d_xi_qp, le3d_w_qp)
+  ALLOCATE( le3d_n_qp(le3d_nnodes, nqps_tot) )
+  ALLOCATE( le3d_dndxi_qp(3, le3d_nnodes, nqps_tot) )
+  CALL get_localelement3d_n_qp(es3d%le3d, le3d_n_qp, le3d_dndxi_qp)
+
+  ALLOCATE( x_local(3, le3d_nnodes) )
+
+!--------------------------------------------------------------------
+
+  DO ie = 1, es3d%n
+
+   !--------------------------------------------------------
+
+   es3d%volume(ie) = 0.0D0
+
+   !--------------------------------------------------------
+
+  DO na = 1, le3d_nnodes
+
+    id = es3d%connectivity(na, ie)
+
+    DO i = 1, 3
+
+      x_local(i, na) = ns3d_x(i, id)
+
+    END DO
+
+  END DO
+
+  !--------------------------------------------------------
+
+  DO ijk = 1, nqps_tot
+
+    !--------------------------------------------------
+    ! Covariant basis vector
+
+    DO i = 1, 3
+
+      g1(i) = 0.0D0
+      g2(i) = 0.0D0
+      g3(i) = 0.0D0
+
+      DO na = 1, le3d_nnodes
+
+        g1(i) = g1(i)+le3d_dndxi_qp(1, na, ijk)*x_local(i, na)
+        g2(i) = g2(i)+le3d_dndxi_qp(2, na, ijk)*x_local(i, na)
+        g3(i) = g3(i)+le3d_dndxi_qp(3, na, ijk)*x_local(i, na)
+
+      END DO
+
+      !--------------------------------------------------
+
+      ! Jacobian
+      det_j = g1(1)*( g2(2)*g3(3)-g2(3)*g3(2) ) &
+      +g1(2)*( g2(3)*g3(1)-g2(1)*g3(3) ) &
+      +g1(3)*( g2(1)*g3(2)-g2(2)*g3(1) )
+      w_w_w_det_j                                             &
+      = le3d_w_qp(1, ijk)*le3d_w_qp(2, ijk)*le3d_w_qp(3, ijk) &
+      *det_j
+
+      !--------------------------------------------------
+
+      es3d%volume(ie) = es3d%volume(ie)+w_w_w_det_j
+
+      !--------------------------------------------------
+
+    END DO
+
+    !--------------------------------------------------------
+  END DO
 
 !--------------------------------------------------------------------
 
@@ -267,14 +367,12 @@ INTEGER :: ie
 
   DO ie = 1, es3d%n
 
-    IF( es3d%volume(ie) .EQ. es3d%max_volume ) THEN
+   IF( es3d%volume(ie) .EQ. es3d%max_volume ) THEN
 
-      es3d%ie_max_volume = ie
-
-    END IF
+     es3d%ie_max_volume = ie
+   END IF
 
   END DO
-
 !--------------------------------------------------------------
 
   es3d%min_volume = MINVAL( es3d%volume )
@@ -303,13 +401,20 @@ INTEGER :: ie
 END SUBROUTINE cal_elements3d
 !####################################################################
 
-
-! Delete elements3d
+      ! Delete elements3d
 !####################################################################
 SUBROUTINE del_elements3d(es3d)
 !####################################################################
 
   TYPE(struct_elements3d), INTENT(INOUT) :: es3d
+
+!--------------------------------------------------------------------
+
+  IF ( es3d%n .EQ. 0 ) THEN
+
+    RETURN
+
+  END IF
 
 !--------------------------------------------------------------------
 
@@ -320,21 +425,15 @@ SUBROUTINE del_elements3d(es3d)
 
   es3d%n = 0
 
-  IF( es3d%n .EQ. 0 ) THEN
-
-    RETURN
-
-  END IF
-
-!--------------------------------------------------------------
+  !--------------------------------------------------------------
 
   DEALLOCATE( es3d%connectivity )
 
-!--------------------------------------------------------------
+  !--------------------------------------------------------------
 
   DEALLOCATE( es3d%volume )
 
-!--------------------------------------------------------------
+  !--------------------------------------------------------------
 
   es3d%max_volume = 0.0D0
   es3d%ie_max_volume = 0
@@ -342,7 +441,7 @@ SUBROUTINE del_elements3d(es3d)
   es3d%min_volume = 0.0D0
   es3d%ie_min_volume = 0
 
-!--------------------------------------------------------------
+  !--------------------------------------------------------------
 
   es3d%sum_volume = 0.0D0
 
@@ -351,7 +450,7 @@ SUBROUTINE del_elements3d(es3d)
   RETURN
 
 !####################################################################
-END SUBROUTINE del_elements3d
+  END SUBROUTINE del_elements3d
 !####################################################################
 
 !####################################################################
