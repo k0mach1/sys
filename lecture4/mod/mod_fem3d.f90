@@ -198,11 +198,11 @@ SUBROUTINE init_fem3d                              &
 
   TYPE(struct_fem3d), INTENT(INOUT) :: fem3d
 
-  TYPE(struct_nodes3d), TARGET, INTENT(IN)
-  TYPE(struct_localelement3d), TARGET, INTENT(IN)
-  TYPE(struct_elements3d), TARGET, INTENT(IN)
-  TYPE(struct_elemstiffmat3d), TARGET, INTENT(IN)
-  TYPE(struct_elemexforcevec3d), TARGET, INTENT(IN)
+  TYPE(struct_nodes3d), TARGET, INTENT(IN)          :: ns3d
+  TYPE(struct_localelement3d), TARGET, INTENT(IN)   :: le3d
+  TYPE(struct_elements3d), TARGET, INTENT(IN)       :: es3d
+  TYPE(struct_elemstiffmat3d), TARGET, INTENT(IN)   :: esm3d
+  TYPE(struct_elemexforcevec3d), TARGET, INTENT(IN) :: efv3d
 
   INTEGER, INTENT(IN) :: nnodes_loaded
 
@@ -212,11 +212,11 @@ SUBROUTINE init_fem3d                              &
 
   !--------------------------------------------------------------------
 
-  fem3d%ns3d => ns3d   :: ns3d
-  fem3d%le3d => le3d   :: le3d
-  fem3d%es3d => es3d   :: es3d
-  fem3d%esm3d => esm3d :: esm3d
-  fem3d%efv3d => efv3d :: efv3d
+  fem3d%ns3d => ns3d
+  fem3d%le3d => le3d
+  fem3d%es3d => es3d
+  fem3d%esm3d => esm3d
+  fem3d%efv3d => efv3d
 
   !--------------------------------------------------------------------
 

@@ -255,7 +255,6 @@ SUBROUTINE cal_elements3d(es3d)
 
 TYPE(struct_elements3d), INTENT(INOUT) :: es3d
 
-
   INTEGER :: ns3d_n
   INTEGER :: le3d_nnodes
   INTEGER :: le3d_nqps
@@ -299,42 +298,44 @@ TYPE(struct_elements3d), INTENT(INOUT) :: es3d
 
   DO ie = 1, es3d%n
 
-   !--------------------------------------------------------
+    !--------------------------------------------------------
 
-   es3d%volume(ie) = 0.0D0
+    es3d%volume(ie) = 0.0D0
 
-   !--------------------------------------------------------
+    !--------------------------------------------------------
 
-  DO na = 1, le3d_nnodes
+    DO na = 1, le3d_nnodes
 
-    id = es3d%connectivity(na, ie)
+      id = es3d%connectivity(na, ie)
 
-    DO i = 1, 3
+      DO i = 1, 3
 
-      x_local(i, na) = ns3d_x(i, id)
+        x_local(i, na) = ns3d_x(i, id)
+
+      END DO
 
     END DO
 
-  END DO
+    !--------------------------------------------------------
 
-  !--------------------------------------------------------
+    DO ijk = 1, nqps_tot
 
-  DO ijk = 1, nqps_tot
+      !--------------------------------------------------
+      ! Covariant basis vector
 
-    !--------------------------------------------------
-    ! Covariant basis vector
+      DO i = 1, 3
 
-    DO i = 1, 3
+        g1(i) = 0.0D0
+        g2(i) = 0.0D0
+        g3(i) = 0.0D0
 
-      g1(i) = 0.0D0
-      g2(i) = 0.0D0
-      g3(i) = 0.0D0
+        DO na = 1, le3d_nnodes
 
-      DO na = 1, le3d_nnodes
+          g1(i) = g1(i)+le3d_dndxi_qp(1, na, ijk)*x_local(i, na)
+          g2(i) = g2(i)+le3d_dndxi_qp(2, na, ijk)*x_local(i, na)
+          g3(i) = g3(i)+le3d_dndxi_qp(3, na, ijk)*x_local(i, na)
 
-        g1(i) = g1(i)+le3d_dndxi_qp(1, na, ijk)*x_local(i, na)
-        g2(i) = g2(i)+le3d_dndxi_qp(2, na, ijk)*x_local(i, na)
-        g3(i) = g3(i)+le3d_dndxi_qp(3, na, ijk)*x_local(i, na)
+        END DO
 
       END DO
 
@@ -342,8 +343,9 @@ TYPE(struct_elements3d), INTENT(INOUT) :: es3d
 
       ! Jacobian
       det_j = g1(1)*( g2(2)*g3(3)-g2(3)*g3(2) ) &
-      +g1(2)*( g2(3)*g3(1)-g2(1)*g3(3) ) &
-      +g1(3)*( g2(1)*g3(2)-g2(2)*g3(1) )
+             +g1(2)*( g2(3)*g3(1)-g2(1)*g3(3) ) &
+             +g1(3)*( g2(1)*g3(2)-g2(2)*g3(1) )
+
       w_w_w_det_j                                             &
       = le3d_w_qp(1, ijk)*le3d_w_qp(2, ijk)*le3d_w_qp(3, ijk) &
       *det_j
@@ -356,7 +358,7 @@ TYPE(struct_elements3d), INTENT(INOUT) :: es3d
 
     END DO
 
-    !--------------------------------------------------------
+  !--------------------------------------------------------
   END DO
 
 !--------------------------------------------------------------------
@@ -394,6 +396,13 @@ TYPE(struct_elements3d), INTENT(INOUT) :: es3d
   es3d%sum_volume = SUM( es3d%volume )
 
 !--------------------------------------------------------------------
+
+  DEALLOCATE( ns3d_x )
+  DEALLOCATE( le3d_xi_qp )
+  DEALLOCATE( le3d_w_qp )
+  DEALLOCATE( le3d_n_qp )
+  DEALLOCATE( le3d_dndxi_qp )
+  DEALLOCATE( x_local )
 
   RETURN
 

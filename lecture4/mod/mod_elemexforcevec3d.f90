@@ -190,8 +190,6 @@ SUBROUTINE init_elemexforcevec3d(efv3d, ns3d, le3d, es3d)
 
   !--------------------------------------------------------------------
 
-  23
-  平成 30 年度 S1 ターム火曜・木曜 2 限 人間環境学 (基礎 II) 「有限要素法」
   ALLOCATE( efv3d%f(3*le3d_nnodes, es3d_n) )
 
   efv3d%f = 0.0D0
