@@ -142,7 +142,9 @@ SUBROUTINE start_appli()
 
     IF( dataname .EQ. '!' ) THEN
 
-      EXIT END IF
+      EXIT
+      
+    END IF
 
     END DO
 
