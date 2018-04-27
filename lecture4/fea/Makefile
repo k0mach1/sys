@@ -9,7 +9,7 @@ OBJS = ../mod/mod_nodes3d.o \
 				mod_appli.o \
 				main_appli.o
 fea : ${OBJS}
-				${F90} -o fea *.o -L../../lib -llapack -lrefblas -ltmglib
+				${F90} -o ./bin/fea *.o -L../../lib -llapack -lrefblas -ltmglib
 				rm *.mod *.o
 .f90.o:
 				${F90} -c $<
