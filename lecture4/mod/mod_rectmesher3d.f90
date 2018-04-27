@@ -147,6 +147,7 @@ SUBROUTINE init_rectmesher3d (rm3d, ns3d, le3d, es3d, n_x, x_start, x_end)
   INTEGER :: ns3d_n
   INTEGER :: le3d_nboundaries
   INTEGER :: le3d_nnodes
+  INTEGER :: le3d_nqps
   INTEGER :: es3d_n
 
 !--------------------------------------------------------------------
@@ -183,6 +184,7 @@ SUBROUTINE init_rectmesher3d (rm3d, ns3d, le3d, es3d, n_x, x_start, x_end)
 
   le3d_nboundaries = 6
   le3d_nnodes      = 8
+  le3d_nqps     = 2
 
   es3d_n = rm3d%n_x(1)*rm3d%n_x(2)*rm3d%n_x(3)
 
@@ -194,6 +196,8 @@ SUBROUTINE init_rectmesher3d (rm3d, ns3d, le3d, es3d, n_x, x_start, x_end)
 
   CALL set_localelement3d_nboundaries(le3d, le3d_nboundaries)
   CALL set_localelement3d_nnodes(le3d, le3d_nnodes)
+  CALL set_localelement3d_nqps(le3d, le3d_nqps)
+
 
 !--------------------------------------------------------------------
 

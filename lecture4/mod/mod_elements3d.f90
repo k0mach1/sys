@@ -372,9 +372,11 @@ TYPE(struct_elements3d), INTENT(INOUT) :: es3d
    IF( es3d%volume(ie) .EQ. es3d%max_volume ) THEN
 
      es3d%ie_max_volume = ie
+
    END IF
 
   END DO
+
 !--------------------------------------------------------------
 
   es3d%min_volume = MINVAL( es3d%volume )
@@ -398,10 +400,12 @@ TYPE(struct_elements3d), INTENT(INOUT) :: es3d
 !--------------------------------------------------------------------
 
   DEALLOCATE( ns3d_x )
+
   DEALLOCATE( le3d_xi_qp )
   DEALLOCATE( le3d_w_qp )
   DEALLOCATE( le3d_n_qp )
   DEALLOCATE( le3d_dndxi_qp )
+  
   DEALLOCATE( x_local )
 
   RETURN
