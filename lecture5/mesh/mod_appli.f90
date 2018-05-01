@@ -156,15 +156,20 @@ SUBROUTINE run_appli()
   INTEGER, ALLOCATABLE :: es3d_connectivity(:, :)
   INTEGER :: es3d_ie_max_volume
   INTEGER :: es3d_ie_min_volume
+  INTEGER :: efv3d_nelemboundaries
+  INTEGER, ALLOCATABLE :: efv3d_table_ie(:)
+  INTEGER, ALLOCATABLE :: efv3d_table_ma(:)
   INTEGER :: fem3d_ndofs
   INTEGER :: fem3d_nnodes_loaded
   INTEGER, ALLOCATABLE :: fem3d_id_loaded(:)
   INTEGER :: i
   INTEGER :: id
   INTEGER :: id_l
+  INTEGER :: ma
   INTEGER :: na
   INTEGER :: ie
   INTEGER :: idof
+  INTEGER :: ib
 
   REAL(8), ALLOCATABLE :: ns3d_x(:, :)
   REAL(8), ALLOCATABLE :: ns3d_u(:)
@@ -172,6 +177,7 @@ SUBROUTINE run_appli()
   REAL(8) :: es3d_max_volume
   REAL(8) :: es3d_min_volume
   REAL(8) :: es3d_sum_volume
+  REAL(8), ALLOCATABLE :: efv3d_t(:, :)
   REAL(8), ALLOCATABLE :: fem3d_f_loaded(:, :)
   REAL(8) :: rm3d_x_start(3)
   REAL(8) :: rm3d_x_end(3)
@@ -237,6 +243,61 @@ SUBROUTINE run_appli()
     END DO
 
     fem3d_nnodes_loaded = id_l
+    efv3d_nelemboundaries = ib
+
+    !--------------------------------------------------------
+
+  ! Tensile deformation
+  ELSE IF( prob .EQ. 2 ) THEN
+
+    !--------------------------------------------------------
+
+    id_l = 0
+    ib = 0
+
+    DO ie = 1, es3d_n
+
+      DO ma = 1, le3d_nboundaries
+
+        na = le3d_table_na(1, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 1) = ns3d_x(1, id)
+        x_local(2, 1) = ns3d_x(2, id)
+        x_local(3, 1) = ns3d_x(3, id)
+
+        na = le3d_table_na(2, ma)
+        id = es3d_connectivity(na,ie)
+        x_local(1, 2) = ns3d_x(1, id)
+        x_local(2, 2) = ns3d_x(2, id)
+        x_local(3, 2) = ns3d_x(3, id)
+
+        na = le3d_table_na(3, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 3) = ns3d_x(1, id)
+        x_local(2, 3) = ns3d_x(2, id)
+        x_local(3, 3) = ns3d_x(3, id)
+
+        na = le3d_table_na(4, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 4) = ns3d_x(1, id)
+        x_local(2, 4) = ns3d_x(2, id)
+        x_local(3, 4) = ns3d_x(3, id)
+
+        IF( ( DABS( x_local(1, 1)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 2)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 3)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 4)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+          ib = ib+1
+
+        END IF
+
+      END DO
+
+    END DO
+
+    fem3d_nnodes_loaded = id_l
+    efv3d_nelemboundaries = ib
 
     !--------------------------------------------------------
 
@@ -245,10 +306,17 @@ SUBROUTINE run_appli()
   !--------------------------------------------------------------
 
   CALL init_elemstiffmat3d(esm3d, ns3d, le3d, es3d)
-  CALL init_elemexforcevec3d(efv3d, ns3d, le3d, es3d)
+  CALL init_elemexforcevec3d(efv3d, ns3d, le3d, es3d, efv3d_nelemboundaries)
   CALL init_fem3d                              &
        (fem3d, ns3d, le3d, es3d, esm3d, efv3d, &
         fem3d_nnodes_loaded)
+
+  ALLOCATE( efv3d_table_ie(efv3d_nelemboundaries) )
+  efv3d_table_ie = 0
+  ALLOCATE( efv3d_table_ma(efv3d_nelemboundaries) )
+  efv3d_table_ma = 0
+  ALLOCATE( efv3d_t(3, efv3d_nelemboundaries) )
+  efv3d_t = 0.0D0
 
   CALL get_fem3d_ndofs(fem3d, fem3d_ndofs)
   ALLOCATE( fem3d_id_loaded(fem3d_nnodes_loaded) )
@@ -259,7 +327,7 @@ SUBROUTINE run_appli()
   !--------------------------------------------------------------
 
   ! Tensile deformation
-  IF( prob .EQ. 1 ) THEN
+  IF( (prob .EQ. 1 ) .OR. ( prob .EQ. 2 ) ) THEN
 
     !--------------------------------------------------------
 
@@ -343,12 +411,69 @@ SUBROUTINE run_appli()
 
     END DO
 
+
+  ! Tensile deformation
+  ELSE IF( prob .EQ. 2 ) THEN
+
+    !--------------------------------------------------------
+
+    ib = 0
+
+    DO ie = 1, es3d_n
+
+      DO ma = 1, le3d_nboundaries
+
+        na = le3d_table_na(1, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 1) = ns3d_x(1, id)
+        x_local(2, 1) = ns3d_x(2, id)
+        x_local(3, 1) = ns3d_x(3, id)
+
+        na = le3d_table_na(2, ma)
+        id = es3d_connectivity(na,ie)
+        x_local(1, 2) = ns3d_x(1, id)
+        x_local(2, 2) = ns3d_x(2, id)
+        x_local(3, 2) = ns3d_x(3, id)
+
+        na = le3d_table_na(3, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 3) = ns3d_x(1, id)
+        x_local(2, 3) = ns3d_x(2, id)
+        x_local(3, 3) = ns3d_x(3, id)
+
+        na = le3d_table_na(4, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 4) = ns3d_x(1, id)
+        x_local(2, 4) = ns3d_x(2, id)
+        x_local(3, 4) = ns3d_x(3, id)
+
+        IF( ( DABS( x_local(1, 1)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+           ( DABS( x_local(1, 2)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+           ( DABS( x_local(1, 3)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+           ( DABS( x_local(1, 4)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+          ib = ib+1
+
+          efv3d_table_ie(ib) = ie
+          efv3d_table_ma(ib) = ma
+          efv3d_t(1, ib) = -4.0D7
+          efv3d_t(2, ib) =  0.0D0
+          efv3d_t(3, ib) =  0.0D0
+
+        END IF
+
+      END DO
+
+    END DO
+
   END IF
 
   !--------------------------------------------------------
 
   CALL set_fem3d_f_loaded                        &
         (fem3d, fem3d_id_loaded, fem3d_f_loaded)
+  CALL set_elemexforcevec3d_t                     &
+        (efv3d, efv3d_table_ie, efv3d_ma, efv3d_t)
 
 !--------------------------------------------------------------------
 
@@ -426,6 +551,17 @@ SUBROUTINE run_appli()
 
   END DO
 
+  WRITE(13, '(A)') '!TRACTION'
+
+  DO ib = 1, efv3d_nelemboundaries
+
+    WRITE( 13, '(I8, 2(A, I8), 3(A, E17.8) )' ) &
+           ib, ',', efv3d_table_ie(ib),         &
+           ',', efv3d_table_ma(ib),             &
+           ( ',', efv3d_t(i, ib), i = 1, 3 )
+
+  END DO
+
   WRITE(13, '(A)') '!END'
 
   CLOSE(13)
@@ -480,6 +616,10 @@ SUBROUTINE run_appli()
 
   DEALLOCATE( es3d_volume )
   DEALLOCATE( es3d_connectivity )
+
+  DEALLOCATE( efv3d_table_ie )
+  DEALLOCATE( efv3d_table_ma )
+  DEALLOCATE( efv3d_t )
 
   DEALLOCATE( fem3d_id_loaded )
   DEALLOCATE( fem3d_f_loaded )
