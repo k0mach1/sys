@@ -301,6 +301,76 @@ SUBROUTINE run_appli()
 
     !--------------------------------------------------------
 
+  ! Shear deformation
+  ELSE IF( prob .EQ. 3 ) THEN
+
+    !--------------------------------------------------------
+
+    id_l = 0
+    ib = 0
+
+    DO ie = 1, es3d_n
+
+      DO ma = 1, le3d_nboundaries
+
+        na = le3d_table_na(1, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 1) = ns3d_x(1, id)
+        x_local(2, 1) = ns3d_x(2, id)
+        x_local(3, 1) = ns3d_x(3, id)
+
+        na = le3d_table_na(2, ma)
+        id = es3d_connectivity(na,ie)
+        x_local(1, 2) = ns3d_x(1, id)
+        x_local(2, 2) = ns3d_x(2, id)
+        x_local(3, 2) = ns3d_x(3, id)
+
+        na = le3d_table_na(3, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 3) = ns3d_x(1, id)
+        x_local(2, 3) = ns3d_x(2, id)
+        x_local(3, 3) = ns3d_x(3, id)
+
+        na = le3d_table_na(4, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 4) = ns3d_x(1, id)
+        x_local(2, 4) = ns3d_x(2, id)
+        x_local(3, 4) = ns3d_x(3, id)
+
+        IF( ( DABS( x_local(1, 1)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 2)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 3)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 4)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+              ib = ib+1
+
+        ELSE IF( ( DABS( x_local(1, 1)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+                 ( DABS( x_local(1, 2)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+                 ( DABS( x_local(1, 3)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+                 ( DABS( x_local(1, 4)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+              ib = ib+1
+
+        END IF
+
+        IF( ( DABS( x_local(3, 1)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(3, 2)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(3, 3)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(3, 4)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+          ib = ib+1
+
+        END IF
+
+    END DO
+
+  END DO
+
+  fem3d_nnodes_loaded = id_l
+  efv3d_nelemboundaries = ib
+
+  !--------------------------------------------------------
+
   END IF
 
   !--------------------------------------------------------------
@@ -363,6 +433,30 @@ SUBROUTINE run_appli()
     END DO
 
   !--------------------------------------------------------
+
+  ! Shear deformation
+  ELSE IF( prob .EQ. 3 ) THEN
+
+    !--------------------------------------------------------
+
+    DO id = 1, ns3d_n
+
+      IF( DABS( ns3d_x(3, id)-rm3d_x_start(3) ) .LT. EPSILON(1.0D0) ) THEN
+
+        DO i = 1, 3
+
+          idof = 3*(id-1)+i
+
+          ns3d_u(idof) = 0.0D0
+          ns3d_bc(idof) = 1
+
+        END DO
+
+      END IF
+
+    END DO
+
+    !--------------------------------------------------------
 
   END IF
 
@@ -465,6 +559,91 @@ SUBROUTINE run_appli()
       END DO
 
     END DO
+
+    !--------------------------------------------------------
+
+  ! Shear deformation
+  ELSE IF( prob .EQ. 3 ) THEN
+
+    !--------------------------------------------------------
+
+    ib = 0
+
+    DO ie = 1, es3d_n
+
+      DO ma = 1, le3d_nboundaries
+
+        na = le3d_table_na(1, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 1) = ns3d_x(1, id)
+        x_local(2, 1) = ns3d_x(2, id)
+        x_local(3, 1) = ns3d_x(3, id)
+
+        na = le3d_table_na(2, ma)
+        id = es3d_connectivity(na,ie)
+        x_local(1, 2) = ns3d_x(1, id)
+        x_local(2, 2) = ns3d_x(2, id)
+        x_local(3, 2) = ns3d_x(3, id)
+
+        na = le3d_table_na(3, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 3) = ns3d_x(1, id)
+        x_local(2, 3) = ns3d_x(2, id)
+        x_local(3, 3) = ns3d_x(3, id)
+
+        na = le3d_table_na(4, ma)
+        id = es3d_connectivity(na, ie)
+        x_local(1, 4) = ns3d_x(1, id)
+        x_local(2, 4) = ns3d_x(2, id)
+        x_local(3, 4) = ns3d_x(3, id)
+
+        IF( ( DABS( x_local(1, 1)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 2)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 3)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(1, 4)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+          ib = ib+1
+
+          efv3d_table_ie(ib) = ie
+          efv3d_table_ma(ib) = ma
+          efv3d_t(1, ib) =  0.0D0
+          efv3d_t(2, ib) =  0.0D0
+          efv3d_t(3, ib) = -1.0D8
+
+        ELSE IF( ( DABS( x_local(1, 1)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+               ( DABS( x_local(1, 2)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+               ( DABS( x_local(1, 3)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) .AND.  &
+               ( DABS( x_local(1, 4)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+          ib = ib+1
+          efv3d_table_ie(ib) = ie
+          efv3d_table_ma(ib) = ma
+          efv3d_t(1, ib) = 0.0D0
+          efv3d_t(2, ib) = 0.0D0
+          efv3d_t(3, ib) = 1.0D8
+
+        END IF
+
+        IF( ( DABS( x_local(3, 1)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(3, 2)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(3, 3)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) .AND.  &
+            ( DABS( x_local(3, 4)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) ) THEN
+
+          ib = ib+1
+
+          efv3d_table_ie(ib) = ie
+          efv3d_table_ma(ib) = ma
+          efv3d_t(1, ib) = 1.0D8
+          efv3d_t(2, ib) = 0.0D0
+          efv3d_t(3, ib) = 0.0D0
+
+        END IF
+
+      END DO
+
+    END DO
+
+    !--------------------------------------------------------
 
   END IF
 
