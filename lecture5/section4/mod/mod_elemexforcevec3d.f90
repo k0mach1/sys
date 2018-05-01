@@ -553,7 +553,7 @@ SUBROUTINE cal_elemexforcevec3d(efv3d)
 
           efv3d%f(isize, ie)                      &
           = efv3d%f(isize, ie)                    &
-          +=w_w_w_det_j                          &
+          + w_w_w_det_j                           &
           *efv3d%rho(ie)*nmat(k, isize)*bvec(k)
 
         END DO
