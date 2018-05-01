@@ -39,9 +39,13 @@ SUBROUTINE start_appli()
   INTEGER, ALLOCATABLE :: es3d_connectivity(:, :)
   INTEGER :: fem3d_nnodes_loaded
   INTEGER, ALLOCATABLE :: fem3d_id_loaded(:)
+  INTEGER :: efv3d_nelemboundaries
+  INTEGER, ALLOCATABLE :: efv3d_table_ie(:)
+  INTEGER, ALLOCATABLE :: efv3d_table_ma(:)
   INTEGER :: fem3d_ndofs
   INTEGER :: i
   INTEGER :: id
+  INTEGER :: id_l
   INTEGER :: na
   INTEGER :: ie
   INTEGER :: ib
@@ -54,6 +58,7 @@ SUBROUTINE start_appli()
   REAL(8), ALLOCATABLE :: esm3d_e(:)
   REAL(8), ALLOCATABLE :: esm3d_nu(:)
   REAL(8), ALLOCATABLE :: efv3d_rho(:)
+  REAL(8), ALLOCATABLE :: efv3d_t(:, :)
   REAL(8), ALLOCATABLE :: fem3d_f_loaded(:, :)
   REAL(8) :: e
   REAL(8) :: nu
@@ -143,12 +148,31 @@ SUBROUTINE start_appli()
     IF( dataname .EQ. '!' ) THEN
 
       EXIT
-      
+
     END IF
 
     END DO
 
     fem3d_nnodes_loaded = fem3d_nnodes_loaded-1
+
+
+    efv3d_nelemboundaries = 0
+
+    DO
+
+      READ(13, *) dataname
+
+      efv3d_nelemboundaries = efv3d_nelemboundaries+1
+
+      IF( dataname .EQ. '!' ) THEN
+
+        EXIT
+
+      END IF
+
+    END DO
+
+    efv3d_nelemboundaries = efv3d_nelemboundaries-1
 
   CLOSE(13)
 
@@ -293,6 +317,23 @@ SUBROUTINE start_appli()
 
   READ(13, *) dataname
 
+  ALLOCATE( efv3d_table_ie(efv3d_nelemboundaries) )
+  ALLOCATE( efv3d_table_ma(efv3d_nelemboundaries) )
+  ALLOCATE( efv3d_t(3, efv3d_nelemboundaries) )
+
+  DO ib = 1, efv3d_nelemboundaries
+
+    READ(13, *) number,                                 &
+                efv3d_table_ie(ib), efv3d_table_ma(ib), &
+                ( efv3d_t(i, ib), i = 1, 3 )
+
+  END DO
+
+  CALL set_elemexforcevec3d_t                           &
+       (efv3d, efv3d_table_ie, efv3d_table_ma, efv3d_t)
+
+  READ(13, *) dataname
+
   CLOSE(13)
 
   !--------------------------------------------------------------------
@@ -307,6 +348,9 @@ SUBROUTINE start_appli()
   DEALLOCATE( esm3d_nu )
 
   DEALLOCATE( efv3d_rho )
+  DEALLOCATE( efv3d_table_ie )
+  DEALLOCATE( efv3d_table_ma )
+  DEALLOCATE( efv3d_t )
 
   DEALLOCATE( fem3d_id_loaded )
   DEALLOCATE( fem3d_f_loaded )
