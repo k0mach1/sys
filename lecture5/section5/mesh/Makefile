@@ -10,7 +10,7 @@ OBJS = ../mod/mod_nodes3d.o \
 				mod_appli.o \
 				main_appli.o
 meshing: ${OBJS}
-				${F90} -o ./bin/meshing *.o -L../../lib -llapack -lrefblas -ltmglib
+				${F90} -o ./bin/meshing -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow *.o -L../../../lib -llapack -lrefblas -ltmglib
 				rm *.mod *.o
 .f90.o:
-				${F90} -c $<
+				${F90} -c -fbounds-check -fbacktrace -ffpe-trap=invalid,zero,overflow $<
