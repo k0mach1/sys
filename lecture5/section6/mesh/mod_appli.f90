@@ -652,7 +652,7 @@ SUBROUTINE run_appli()
   CALL set_fem3d_f_loaded                        &
         (fem3d, fem3d_id_loaded, fem3d_f_loaded)
   CALL set_elemexforcevec3d_t                     &
-        (efv3d, efv3d_table_ie, efv3d_ma, efv3d_t)
+        (efv3d, efv3d_table_ie, efv3d_table_ma, efv3d_t)
 
 !--------------------------------------------------------------------
 
