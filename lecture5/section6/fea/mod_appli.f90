@@ -218,7 +218,7 @@ SUBROUTINE start_appli()
   CALL init_elemstiffmat3d(esm3d, ns3d, le3d, es3d)
   CALL init_elemexforcevec3d(efv3d, ns3d, le3d, es3d, efv3d_nelemboundaries)
   CALL init_fem3d                                 &
-        (fem3d, ns3d, le3d, es3d, esm3d, efv3d, 9)
+        (fem3d, ns3d, le3d, es3d, esm3d, efv3d, fem3d_nnodes_loaded)
 
   CALL get_fem3d_ndofs(fem3d, fem3d_ndofs)
 

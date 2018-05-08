@@ -371,6 +371,29 @@ SUBROUTINE run_appli()
 
   !--------------------------------------------------------
 
+  ! Bendng deformation
+  ELSE IF( prob .EQ. 4 ) THEN
+
+    !--------------------------------------------------------
+
+    id_l = 0
+    ib = 0
+
+    DO id = 1, ns3d_n
+
+      IF( DABS( ns3d_x(1, id)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) THEN
+
+        id_l = id_l+1
+
+      END IF
+
+    END DO
+
+    fem3d_nnodes_loaded = id_l
+    efv3d_nelemboundaries = ib
+
+    !--------------------------------------------------------
+
   END IF
 
   !--------------------------------------------------------------
@@ -451,6 +474,44 @@ SUBROUTINE run_appli()
           ns3d_bc(idof) = 1
 
         END DO
+
+      END IF
+
+    END DO
+
+  !--------------------------------------------------------
+
+  ! Bending deformation
+  ELSE IF( prob .EQ. 4 ) THEN
+
+    !--------------------------------------------------------
+
+    DO id = 1, ns3d_n
+
+      IF( DABS( ns3d_x(1, id)-rm3d_x_start(1) ) .LT. EPSILON(1.0D0) ) THEN
+
+        idof = 3*(id-1)+1
+
+        ns3d_u(idof) = 0.0D0
+        ns3d_bc(idof) = 1
+
+        IF( DABS( ns3d_x(2, id)-rm3d_x_center(2) ) .LT. EPSILON(1.0D0) ) THEN
+
+          idof = 3*(id-1)+2
+
+          ns3d_u(idof) = 0.0D0
+          ns3d_bc(idof) = 1
+
+        END IF
+
+        IF( DABS( ns3d_x(3, id)-rm3d_x_center(3) ) .LT. EPSILON(1.0D0) ) THEN
+
+          idof = 3*(id-1)+3
+
+          ns3d_u(idof) = 0.0D0
+          ns3d_bc(idof) = 1
+
+        END IF
 
       END IF
 
@@ -645,9 +706,53 @@ SUBROUTINE run_appli()
 
     !--------------------------------------------------------
 
-  END IF
+  ! Bending deformation
+  ELSE IF( prob .EQ. 4 ) THEN
 
-  !--------------------------------------------------------
+    !--------------------------------------------------------
+
+    id_l = 0
+
+    DO id = 1, ns3d_n
+
+      IF( DABS( ns3d_x(1, id)-rm3d_x_end(1) ) .LT. EPSILON(1.0D0) ) THEN
+
+        id_l = id_l+1
+
+        fem3d_id_loaded(id_l) = id
+        fem3d_f_loaded(1, id_l) = 0.0D0
+
+        IF( DABS( ns3d_x(3, id)-rm3d_x_start(3) ) .LT. EPSILON(1.0D0) ) THEN
+
+          fem3d_f_loaded(1, id_l) = -250.0D0
+
+          IF( DABS( ns3d_x(2, id)-rm3d_x_center(2) ) .LT. EPSILON(1.0D0) ) THEN
+
+            fem3d_f_loaded(1, id_l) = -500.0D0
+
+          END IF
+
+        END IF
+
+        IF( DABS( ns3d_x(3, id)-rm3d_x_end(3) ) .LT. EPSILON(1.0D0) ) THEN
+
+          fem3d_f_loaded(1, id_l) = 250.0D0
+
+          IF( DABS( ns3d_x(2, id)-rm3d_x_center(2) ) .LT. EPSILON(1.0D0) ) THEN
+
+            fem3d_f_loaded(1, id_l) = 500.0D0
+
+          END IF
+
+        END IF
+
+      END IF
+
+    END DO
+
+    !--------------------------------------------------------------------
+
+  END IF
 
   CALL set_fem3d_f_loaded                        &
         (fem3d, fem3d_id_loaded, fem3d_f_loaded)
